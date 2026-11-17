@@ -11,28 +11,45 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import ru.anton2319.absolutcinema.data.FakeDevices
+import ru.anton2319.absolutcinema.model.InterruptSettings
 
-private enum class Screen { HOME, DEVICE_LIST }
+private enum class Screen { HOME, DEVICE_LIST, PROFILE, INTERRUPT }
 
-/** The app: Home, with See All opening the Device List. Back returns to Home. */
+/**
+ * The app. Home opens the Device List (See All) and Profile; Profile opens
+ * Interrupt Mode. Back goes up one level.
+ */
 @Composable
 fun AbsolutCinemaApp() {
     var screen by remember { mutableStateOf(Screen.HOME) }
+    var settings by remember { mutableStateOf(InterruptSettings()) }
     val devices = FakeDevices.all
 
-    BackHandler(enabled = screen != Screen.HOME) { screen = Screen.HOME }
+    BackHandler(enabled = screen != Screen.HOME) {
+        screen = if (screen == Screen.INTERRUPT) Screen.PROFILE else Screen.HOME
+    }
 
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+        val padded = Modifier.padding(innerPadding)
         when (screen) {
             Screen.HOME -> HomeScreen(
                 devices = devices,
                 pinnedIds = FakeDevices.pinnedIds,
                 onSeeAll = { screen = Screen.DEVICE_LIST },
-                modifier = Modifier.padding(innerPadding)
+                modifier = padded,
+                noInterrupt = settings.noInterrupt,
+                onProfile = { screen = Screen.PROFILE }
             )
-            Screen.DEVICE_LIST -> DeviceListScreen(
-                devices = devices,
-                modifier = Modifier.padding(innerPadding)
+            Screen.DEVICE_LIST -> DeviceListScreen(devices = devices, modifier = padded)
+            Screen.PROFILE -> ProfileScreen(
+                settings = settings,
+                onInterruptMode = { screen = Screen.INTERRUPT },
+                modifier = padded
+            )
+            Screen.INTERRUPT -> InterruptSettingsScreen(
+                settings = settings,
+                onSettingsChange = { settings = it },
+                modifier = padded
             )
         }
     }
