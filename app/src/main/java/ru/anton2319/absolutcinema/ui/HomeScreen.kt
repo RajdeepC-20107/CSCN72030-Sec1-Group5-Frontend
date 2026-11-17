@@ -33,7 +33,9 @@ fun HomeScreen(
     devices: List<Device>,
     pinnedIds: List<String>,
     onSeeAll: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    noInterrupt: Boolean = false,
+    onProfile: () -> Unit = {}
 ) {
     val pinned = devices.filter { it.id in pinnedIds }
 
@@ -43,7 +45,25 @@ fun HomeScreen(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         item(key = "title") {
-            Text(text = "AbsolutCinema", style = MaterialTheme.typography.headlineMedium)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(text = "AbsolutCinema", style = MaterialTheme.typography.headlineMedium)
+                TextButton(onClick = onProfile) { Text("Profile") }
+            }
+        }
+        if (noInterrupt) {
+            item(key = "no-interrupt") {
+                Card(modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        text = "No Interrupt is on",
+                        style = MaterialTheme.typography.labelLarge,
+                        modifier = Modifier.padding(12.dp)
+                    )
+                }
+            }
         }
         item(key = "now-playing") { NowPlayingCard() }
         item(key = "seating") { SeatingCard(seat = "B3") }
